@@ -4,8 +4,8 @@ The BetterShifting plugin is a trainer to help you use your shift keys more prop
 
 ## Using the plugin
 
-To use the plugin, just include the header, add it to the list of used plugins,
-and register the `Focus` hooks:
+To use the plugin, just include the header and add it to the
+list of used plugins.
 
 ```c++
 #include <Kaleidoscope.h>
