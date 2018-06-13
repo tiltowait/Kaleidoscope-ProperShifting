@@ -4,7 +4,7 @@
 UNAME_S := $(shell uname -s)
 
 ifeq ($(UNAME_S),Darwin)
-SKETCHBOOK_DIR ?= $(HOME)/Programming/Arduino/
+SKETCHBOOK_DIR ?= $(HOME)/Documents/Arduino/
 else
 SKETCHBOOK_DIR ?= $(HOME)/Arduino
 endif
