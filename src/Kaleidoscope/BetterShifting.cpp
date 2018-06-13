@@ -22,6 +22,8 @@ namespace kaleidoscope {
 
 //BetterShifting
 bool BetterShifting::disabled = false;
+bool BetterShifting::leftHalfDisabled = false;
+bool BetterShifting::rightHalfDisabled = false;
 
 void BetterShifting::enable() {
 	disabled = false;
@@ -31,22 +33,29 @@ void BetterShifting::disable() {
 	disabled = true;
 }
 
-bool BetterShifting::active() {
+bool BetterShifting::isActive() {
 	return !disabled;
 }
 
 EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
 	static const int DIVIDER = COLS / 2;
 
-	if(disabled)
-		return EventHandlerResult::OK;
-
 	if(mapped_key.raw == Key_LeftShift.raw) {
-		if(col < DIVIDER) {
-			return EventHandlerResult::EVENT_CONSUMED;
+		if(keyIsPressed(key_state)) {
+			leftHalfDisabled = true;
+		} else {
+			leftHalfDisabled = false;
 		}
 	} else if(mapped_key.raw == Key_RightShift.raw) {
-		if(col > DIVIDER) {
+		if(keyIsPressed(key_state)) {
+			rightHalfDisabled = true;
+		} else {
+			rightHalfDisabled = false;
+		}
+	} else {
+		if(col < DIVIDER && leftHalfDisabled) {
+			return EventHandlerResult::EVENT_CONSUMED;
+		} else if(col > DIVIDER && rightHalfDisabled) {
 			return EventHandlerResult::EVENT_CONSUMED;
 		}
 	}

@@ -28,12 +28,14 @@ class BetterShifting : public kaleidoscope::Plugin {
 
 		static void enable(void);
 		static void disable(void);
-		static bool active(void);
+		static bool isActive(void);
 
 		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
 
 	private:
 		static bool disabled;
+		static bool leftHalfDisabled;
+		static bool rightHalfDisabled;
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
