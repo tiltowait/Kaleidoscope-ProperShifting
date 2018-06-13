@@ -40,6 +40,10 @@ bool BetterShifting::isActive() {
 EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
 	static const int DIVIDER = COLS / 2;
 
+	if(disabled) {
+		return EventHandlerResult::OK;
+	}
+
 	if(mapped_key.raw == Key_LeftShift.raw) {
 		if(keyIsPressed(key_state)) {
 			leftHalfDisabled = true;
