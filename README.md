@@ -42,3 +42,9 @@ The plugin provides the `BetterShifting` object, with the following methods:
 ## Dependencies
 
 None.
+
+## Known Issues
+
+In some instances, rapidly hitting shift, then a key on the same side, then releasing both keys, will send the lower-case version of that key instead of no key at all. I suspect (but haven't verified) that this is due to a timing detail in Kaleidoscope rather than a bug with the plugin.
+
+In either case, the bug is obscure enough that I'm not sure how to fix it without overcomplicating the plugin.
