@@ -22,8 +22,8 @@ namespace kaleidoscope {
 
 //BetterShifting
 bool BetterShifting::disabled = false;
-bool BetterShifting::leftHalfDisabled = false;
-bool BetterShifting::rightHalfDisabled = false;
+bool BetterShifting::left_shift_pressed = false;
+bool BetterShifting::right_shift_pressed = false;
 
 void BetterShifting::enable() {
 	disabled = false;
@@ -39,31 +39,45 @@ bool BetterShifting::isActive() {
 
 EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
 	static const int DIVIDER = COLS / 2;
+	static bool *shift_pressed;
 
 	if(disabled) {
 		return EventHandlerResult::OK;
 	}
 
-	if(mapped_key.raw == Key_LeftShift.raw) {
-		if(keyIsPressed(key_state)) {
-			leftHalfDisabled = true;
+	if(mapped_key == Key_LeftShift || mapped_key == Key_RightShift) {
+		if(mapped_key == Key_LeftShift) {
+			shift_pressed = &left_shift_pressed;
 		} else {
-			leftHalfDisabled = false;
+			shift_pressed = &right_shift_pressed;
 		}
-	} else if(mapped_key.raw == Key_RightShift.raw) {
-		if(keyIsPressed(key_state)) {
-			rightHalfDisabled = true;
-		} else {
-			rightHalfDisabled = false;
+
+		if(keyToggledOn(key_state)) {
+			*shift_pressed = true;
+		} else if(keyToggledOff(key_state)) {
+			*shift_pressed = false;
 		}
-	} else {
-		if(col < DIVIDER && leftHalfDisabled) {
-			return EventHandlerResult::EVENT_CONSUMED;
-		} else if(col > DIVIDER && rightHalfDisabled) {
-			return EventHandlerResult::EVENT_CONSUMED;
-		}
+
+		return EventHandlerResult::OK;
 	}
 
+	//Allow any keypress if both shifts are held.
+	//This makes typing in all-caps without capslock
+	//less painful.
+	if(left_shift_pressed && right_shift_pressed) {
+		return EventHandlerResult::OK;
+	}
+
+	//Don't allow left half + left shift, nor
+	//right half + right shift
+	if(left_shift_pressed && col < DIVIDER) {
+		return EventHandlerResult::EVENT_CONSUMED;
+	} else if(right_shift_pressed && DIVIDER < col) {
+		return EventHandlerResult::EVENT_CONSUMED;
+	}
+
+	//No shifts are held, or we're on the opposite side
+	//of the held shift key.
 	return EventHandlerResult::OK;
 }
 

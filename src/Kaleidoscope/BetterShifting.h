@@ -34,8 +34,8 @@ class BetterShifting : public kaleidoscope::Plugin {
 
 	private:
 		static bool disabled;
-		static bool leftHalfDisabled;
-		static bool rightHalfDisabled;
+		static bool left_shift_pressed;
+		static bool right_shift_pressed;
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:

@@ -2,6 +2,8 @@
 
 The BetterShifting plugin is a trainer to help you use your shift keys more properly. If you hold down the left shift, it disables input on the left half of the keyboard. Right shift disables the right half of the keyboard.
 
+Holding both shift keys behaves like a shift-lock for as long as they're both held. This allows you to type IN ALL CAPS without giving your thumbs an obnoxious workout.
+
 ## Using the plugin
 
 To use the plugin, just include the header and add it to the
