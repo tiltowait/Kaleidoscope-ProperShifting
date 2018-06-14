@@ -45,6 +45,7 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 		return EventHandlerResult::OK;
 	}
 
+	//Determine which shift, if any, is being held/released.
 	if(mapped_key == Key_LeftShift || mapped_key == Key_RightShift) {
 		if(mapped_key == Key_LeftShift) {
 			shift_pressed = &left_shift_pressed;
