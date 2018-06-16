@@ -25,6 +25,9 @@ namespace kaleidoscope {
 class BetterShifting : public kaleidoscope::Plugin {
 	public:
 		BetterShifting(void) {}
+		~BetterShifting(void) {
+			clearIgnoredKeys();
+		}
 
 		static void enable(void);
 		static void disable(void);
@@ -32,6 +35,7 @@ class BetterShifting : public kaleidoscope::Plugin {
 
 		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
 		void ignoreKeys(int num_keys, ...);
+		void clearIgnoredKeys();
 
 	private:
 		static bool disabled;

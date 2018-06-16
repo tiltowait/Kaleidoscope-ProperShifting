@@ -48,6 +48,10 @@ The plugin provides the `BetterShifting` object, with the following methods:
 > must be of type `uint16_t`, as obtained by calling the `.raw` member of
 > a Key object.
 
+### `.clearIgnoredKeys()`
+
+> Empties the current list of ignored keys, if one exists.
+
 ## Dependencies
 
 None.

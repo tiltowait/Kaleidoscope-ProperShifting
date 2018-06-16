@@ -90,9 +90,12 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 //shift rules applied to them. Note that the argument
 //type is uint16_t, and this function is NOT typesafe.
 void BetterShifting::ignoreKeys(int num_keys, ...) {
+	clearIgnoredKeys();
+
 	if(num_keys < 1) {
 		return;
 	}
+
 	ignored_keys = new uint16_t[num_keys];
 	num_ignored_keys = num_keys;
 
@@ -102,6 +105,14 @@ void BetterShifting::ignoreKeys(int num_keys, ...) {
 		ignored_keys[i] = va_arg(args, uint16_t);
 	}
 	va_end(args);
+}
+
+//Empty the current list of ignored keys, if there is
+//one.
+void BetterShifting::clearIgnoredKeys(void) {
+	if(num_ignored_keys > 0) {
+		delete [] ignored_keys;
+	}
 }
 
 //Determine if a key should have the shift rules ignored.
