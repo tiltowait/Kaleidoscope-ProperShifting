@@ -17,6 +17,7 @@
  */
 
 #include <Kaleidoscope-BetterShifting.h>
+#include <stdarg.h>
 
 namespace kaleidoscope {
 
@@ -24,6 +25,9 @@ namespace kaleidoscope {
 bool BetterShifting::disabled = false;
 bool BetterShifting::left_shift_pressed = false;
 bool BetterShifting::right_shift_pressed = false;
+
+uint16_t * BetterShifting::ignored_keys = NULL;
+int BetterShifting::num_ignored_keys = 0;
 
 void BetterShifting::enable() {
 	disabled = false;
@@ -41,7 +45,7 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 	static const int DIVIDER = COLS / 2;
 	static bool *shift_pressed;
 
-	if(disabled) {
+	if(disabled || keyIsIgnored(mapped_key.raw)) {
 		return EventHandlerResult::OK;
 	}
 
@@ -80,6 +84,35 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 	//No shifts are held, or we're on the opposite side
 	//of the held shift key.
 	return EventHandlerResult::OK;
+}
+
+//Build an array of keys (Key_*.raw) that won't have
+//shift rules applied to them. Note that the argument
+//type is uint16_t, and this function is NOT typesafe.
+void BetterShifting::ignoreKeys(int num_keys, ...) {
+	if(num_keys < 1) {
+		return;
+	}
+	ignored_keys = new uint16_t[num_keys];
+	num_ignored_keys = num_keys;
+
+	va_list args;
+	va_start(args, num_keys);
+	for(int i = 0; i < num_keys; i++) {
+		ignored_keys[i] = va_arg(args, uint16_t);
+	}
+	va_end(args);
+}
+
+//Determine if a key should have the shift rules ignored.
+inline bool BetterShifting::keyIsIgnored(uint16_t key) {
+	static int i;
+	for(i = 0; i < num_ignored_keys; i++) {
+		if(ignored_keys[i] == key) {
+			return true;
+		}
+	}
+	return false;
 }
 
 // Legacy V1 API

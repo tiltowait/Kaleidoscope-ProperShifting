@@ -6,8 +6,7 @@ Holding both shift keys behaves like a shift-lock for as long as they're both he
 
 ## Using the plugin
 
-To use the plugin, just include the header and add it to the
-list of used plugins.
+To use the plugin, just include the header and add it to the list of used plugins. If you want to include keys that ignore the shifting rules, you may define them in `ignoreKeys(int num_keys, ...)` as in the following example.
 
 ```c++
 #include <Kaleidoscope.h>
@@ -17,6 +16,7 @@ KALEIDOSCOPE_INIT_PLUGINS(BetterShifting);
 
 void setup() {
   Kaleidoscope.setup();
+  BetterShifting.ignoreKeys(2, Key_A.raw, Key_B.raw);
 }
 ```
 
@@ -39,12 +39,15 @@ The plugin provides the `BetterShifting` object, with the following methods:
 > This method returns `true` if BetterShifting is enabled and `false` if
 > BetterShifting is disabled.
 
+### `.ignoreKeys(int num_keys, ...)`
+
+> This method takes a variable number of arguments which will be used to
+> build a list of keys for which the shift rules will not apply.
+>
+> `num_keys` is the number of keys in the list. The rest of the arguments
+> must be of type `uint16_t`, as obtained by calling the `.raw` member of
+> a Key object.
+
 ## Dependencies
 
 None.
-
-## Known Issues
-
-In some instances, rapidly hitting shift, then a key on the same side, then releasing both keys, will send the lower-case version of that key instead of no key at all. I suspect (but haven't verified) that this is due to a timing detail in Kaleidoscope rather than a bug with the plugin.
-
-In either case, the bug is obscure enough that I'm not sure how to fix it without overcomplicating the plugin.

@@ -31,11 +31,16 @@ class BetterShifting : public kaleidoscope::Plugin {
 		static bool isActive(void);
 
 		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
+		void ignoreKeys(int num_keys, ...);
 
 	private:
 		static bool disabled;
 		static bool left_shift_pressed;
 		static bool right_shift_pressed;
+		static uint16_t *ignored_keys;
+		static int num_ignored_keys;
+
+		inline bool keyIsIgnored(uint16_t key);
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
