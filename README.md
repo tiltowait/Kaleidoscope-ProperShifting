@@ -39,6 +39,20 @@ The plugin provides the `BetterShifting` object, with the following methods:
 > This method returns `true` if BetterShifting is enabled and `false` if
 > BetterShifting is disabled.
 
+### `.enableModifierRules()`
+
+> Make the plugin ignore shift key rules if a modifier key (alt, ctrl, super) is being held.
+>
+> The default behavior is `enabled`.
+
+### `.disableModifierRules()`
+
+> Holding a modifier will *not* ignore shifting rules.
+
+### `.modifiersIgnoreShifting()`
+
+> Returns `true` if holding a modifier key will ignore the standard shifting rules.
+
 ### `.ignoreKeys(int num_keys, ...)`
 
 > This method takes a variable number of arguments which will be used to

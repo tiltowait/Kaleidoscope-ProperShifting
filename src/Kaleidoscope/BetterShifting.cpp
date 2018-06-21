@@ -22,13 +22,17 @@
 namespace kaleidoscope {
 
 //BetterShifting
+
+//Basic shifting ivars.
 bool BetterShifting::disabled = false;
 bool BetterShifting::left_shift_pressed = false;
 bool BetterShifting::right_shift_pressed = false;
 
+//ivars for key ignoring
 uint16_t * BetterShifting::ignored_keys = NULL;
 int BetterShifting::num_ignored_keys = 0;
 
+//ivars for special modifier key rules
 bool BetterShifting::mods_ignore_shifting = true;
 int BetterShifting::num_modifiers_on = 0;
 uint16_t BetterShifting::modifiers[] = {
@@ -36,6 +40,7 @@ uint16_t BetterShifting::modifiers[] = {
 	Key_LeftGui.raw, Key_RightGui.raw,
 	Key_RightAlt.raw, Key_RightControl.raw
 };
+#define NUM_MODIFIER_KEYS 6
 
 void BetterShifting::enable() {
 	disabled = false;
@@ -49,11 +54,11 @@ bool BetterShifting::isActive() {
 	return !disabled;
 }
 
-void BetterShifting::enableModifiersIgnoreShifting() {
+void BetterShifting::enableModifierRules() {
 	mods_ignore_shifting = true;
 }
 
-void BetterShifting::disableModifiersIgnoreShifting() {
+void BetterShifting::disableModifierRules() {
 	mods_ignore_shifting = false;
 }
 
@@ -82,29 +87,25 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 		} else if(keyToggledOff(key_state)) {
 			*shift_pressed = false;
 		}
-
 		return EventHandlerResult::OK;
 	}
 
 	//Modifier keys (alt, ctrl, etc.) override shifting rules.
 	if(mods_ignore_shifting && keyIsModifier(mapped_key.raw)) {
 		if(keyToggledOn(key_state)) {
-			num_modifiers_on++;
+			num_modifiers_on++; //This is an int, because multiple modifiers might be held
 		} else if(keyToggledOff(key_state)) {
 			num_modifiers_on--;
 		}
 		return EventHandlerResult::OK;
 	}
 
-	//Allow any keypress if both shifts are held.
-	//This makes typing in all-caps without capslock
-	//less painful.
-	if(modStatus() || (left_shift_pressed && right_shift_pressed)) {
+	//Allow any keypress if both shifts (or 1+ modifiers) are held.
+	if(MOD_OVERRIDE() || (left_shift_pressed && right_shift_pressed)) {
 		return EventHandlerResult::OK;
 	}
 
-	//Don't allow left half + left shift, nor
-	//right half + right shift
+	//Don't allow left half + left shift, nor right half + right shift
 	if(left_shift_pressed && col < DIVIDER) {
 		return EventHandlerResult::EVENT_CONSUMED;
 	} else if(right_shift_pressed && DIVIDER < col) {
@@ -159,7 +160,7 @@ inline bool BetterShifting::keyIsIgnored(uint16_t key) {
 //Return true if the passed key.raw is a modifier.
 inline bool BetterShifting::keyIsModifier(uint16_t key) {
 	static int i;
-	for(i = 0; i < 6; i++) {
+	for(i = 0; i < NUM_MODIFIER_KEYS; i++) {
 		if(key == modifiers[i]) {
 			return true;
 		}

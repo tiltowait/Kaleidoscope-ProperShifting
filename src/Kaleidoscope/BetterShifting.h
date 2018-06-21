@@ -33,8 +33,8 @@ class BetterShifting : public kaleidoscope::Plugin {
 		static void disable(void);
 		static bool isActive(void);
 
-		static void enableModifiersIgnoreShifting(void);
-		static void disableModifiersIgnoreShifting(void);
+		static void enableModifierRules(void);
+		static void disableModifierRules(void);
 		static bool modifiersIgnoreShifting(void);
 
 		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
@@ -59,7 +59,7 @@ class BetterShifting : public kaleidoscope::Plugin {
 		static int num_modifiers_on;
 		inline bool keyIsModifier(uint16_t key);
 
-		#define modStatus() (mods_ignore_shifting && num_modifiers_on > 0)
+		#define MOD_OVERRIDE() (mods_ignore_shifting && num_modifiers_on > 0)
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
