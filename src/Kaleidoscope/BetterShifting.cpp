@@ -29,6 +29,14 @@ bool BetterShifting::right_shift_pressed = false;
 uint16_t * BetterShifting::ignored_keys = NULL;
 int BetterShifting::num_ignored_keys = 0;
 
+bool BetterShifting::mods_ignore_shifting = true;
+int BetterShifting::num_modifiers_on = 0;
+uint16_t BetterShifting::modifiers[] = {
+	Key_LeftControl.raw, Key_LeftAlt.raw,
+	Key_LeftGui.raw, Key_RightGui.raw,
+	Key_RightAlt.raw, Key_RightControl.raw
+};
+
 void BetterShifting::enable() {
 	disabled = false;
 }
@@ -39,6 +47,18 @@ void BetterShifting::disable() {
 
 bool BetterShifting::isActive() {
 	return !disabled;
+}
+
+void BetterShifting::enableModifiersIgnoreShifting() {
+	mods_ignore_shifting = true;
+}
+
+void BetterShifting::disableModifiersIgnoreShifting() {
+	mods_ignore_shifting = false;
+}
+
+bool BetterShifting::modifiersIgnoreShifting() {
+	return mods_ignore_shifting;
 }
 
 EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
@@ -66,10 +86,20 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 		return EventHandlerResult::OK;
 	}
 
+	//Modifier keys (alt, ctrl, etc.) override shifting rules.
+	if(mods_ignore_shifting && keyIsModifier(mapped_key.raw)) {
+		if(keyToggledOn(key_state)) {
+			num_modifiers_on++;
+		} else if(keyToggledOff(key_state)) {
+			num_modifiers_on--;
+		}
+		return EventHandlerResult::OK;
+	}
+
 	//Allow any keypress if both shifts are held.
 	//This makes typing in all-caps without capslock
 	//less painful.
-	if(left_shift_pressed && right_shift_pressed) {
+	if(modStatus() || (left_shift_pressed && right_shift_pressed)) {
 		return EventHandlerResult::OK;
 	}
 
@@ -120,6 +150,17 @@ inline bool BetterShifting::keyIsIgnored(uint16_t key) {
 	static int i;
 	for(i = 0; i < num_ignored_keys; i++) {
 		if(ignored_keys[i] == key) {
+			return true;
+		}
+	}
+	return false;
+}
+
+//Return true if the passed key.raw is a modifier.
+inline bool BetterShifting::keyIsModifier(uint16_t key) {
+	static int i;
+	for(i = 0; i < 6; i++) {
+		if(key == modifiers[i]) {
 			return true;
 		}
 	}
