@@ -18,7 +18,7 @@ The plugin ignores the shifting rules if other modifiers (Control, Alt, or GUI) 
 
 ## Using the plugin
 
-To use the plugin, just include the header and add it to the list of used plugins. If you want to include keys that ignore the shifting rules, you may define them in `ignoreKeys(int num_keys, ...)` as in the following example.
+To use the plugin, simply include the header and add it to the list of used plugins.
 
 ```c++
 #include <Kaleidoscope.h>
@@ -28,7 +28,6 @@ KALEIDOSCOPE_INIT_PLUGINS(ProperShifting);
 
 void setup() {
   Kaleidoscope.setup();
-  ProperShifting.ignoreKeys(2, Key_A.raw, Key_B.raw);
 }
 ```
 
