@@ -1,8 +1,20 @@
 # Kaleidoscope-ProperShifting
 
-The ProperShifting plugin is a trainer to help you use your shift keys more properly. If you hold down the left shift, it disables input on the left half of the keyboard. Right shift disables the right half of the keyboard.
+A plugin for the Keyboardio Model 01 to ensure proper shifting technique.
+
+## Purpose
+
+Force the user to use both hands while shifting. Typing a capital *A*, for instance, requires using the right shift. Capital *M*, meanwhile, necessitates the left shift.
+
+## Motivation
+
+Proper typing technique helps to reduce RSI and other discomforts while spending many hours at the keyboard.
 
 Holding both shift keys behaves like a shift-lock for as long as they're both held. This allows you to type IN ALL CAPS without giving your thumbs an obnoxious workout.
+
+## Extra Behavior
+
+The plugin ignores the shifting rules if other modifiers (Control, Alt, or GUI) are also being held. Additionally, the user may enter a pseudo-shiftlock mode by holding both shifts.
 
 ## Using the plugin
 
@@ -20,52 +32,25 @@ void setup() {
 }
 ```
 
-## Plugin Methods
+### Plugin Methods
 
 The plugin provides the `ProperShifting` object, with the following methods:
 
-### `.enable()`
+#### `.enable()`
 
 > Enable the ProperShifting plugin.
 >
 > The default behavior is `enabled`.
 
-### `.disable()`
+#### `.disable()`
 
 > Disable the ProperShifting plugin.
 
-### `.isActive()`
+#### `.isActive()`
 
 > This method returns `true` if ProperShifting is enabled and `false` if
 > ProperShifting is disabled.
 
-### `.enableModifierRules()`
-
-> Make the plugin ignore shift key rules if a modifier key (alt, ctrl, super) is being held.
->
-> The default behavior is `enabled`.
-
-### `.disableModifierRules()`
-
-> Holding a modifier will *not* ignore shifting rules.
-
-### `.modifiersIgnoreShifting()`
-
-> Returns `true` if holding a modifier key will ignore the standard shifting rules.
-
-### `.ignoreKeys(int num_keys, ...)`
-
-> This method takes a variable number of arguments which will be used to
-> build a list of keys for which the shift rules will not apply.
->
-> `num_keys` is the number of keys in the list. The rest of the arguments
-> must be of type `uint16_t`, as obtained by calling the `.raw` member of
-> a Key object.
-
-### `.clearIgnoredKeys()`
-
-> Empties the current list of ignored keys, if one exists.
-
 ## Dependencies
 
-None.
+Nothing beyond the Kaleidoscope core.
