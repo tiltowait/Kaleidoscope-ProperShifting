@@ -48,7 +48,7 @@ class ProperShifting : public kaleidoscope::Plugin {
 #define keyIsShift(key) (key == Key_LeftShift || key == Key_RightShift)
 #define modifiersPressed() (active_modifiers > 0)
 #define shiftsIdentical() (left_shift_on == right_shift_on)
-#define keysCleared() (KeyboardHardware.pressedKeyswitchCount())
+#define keysCleared() (KeyboardHardware.pressedKeyswitchCount() == 0)
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
