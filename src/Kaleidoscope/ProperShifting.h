@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * Kaleidoscope-BetterShifting -- Force proper shift usage
+ * Kaleidoscope-ProperShifting -- Force proper shift usage
  * Copyright (C) 2018 Jared Lindsay
  *
  * This program is free software: you can redistribute it and/or modify
@@ -22,10 +22,10 @@
 
 namespace kaleidoscope {
 
-class BetterShifting : public kaleidoscope::Plugin {
+class ProperShifting : public kaleidoscope::Plugin {
 	public:
-		BetterShifting(void) {}
-		~BetterShifting(void) {}
+		ProperShifting(void) {}
+		~ProperShifting(void) {}
 
 		static void enable(void);
 		static void disable(void);
@@ -57,4 +57,4 @@ class BetterShifting : public kaleidoscope::Plugin {
 };
 }
 
-extern kaleidoscope::BetterShifting BetterShifting;
+extern kaleidoscope::ProperShifting ProperShifting;

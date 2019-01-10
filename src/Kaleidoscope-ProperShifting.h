@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * Kaleidoscope-BetterShifting -- Force proper shift usage
+ * Kaleidoscope-ProperShifting -- Force proper shift usage
  * Copyright (C) 2018 Jared Lindsay
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,4 +18,4 @@
 
 #pragma once
 
-#include "Kaleidoscope/BetterShifting.h"
+#include "Kaleidoscope/ProperShifting.h"

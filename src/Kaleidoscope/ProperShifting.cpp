@@ -1,5 +1,5 @@
 /* -*- mode: c++ -*-
- * Kaleidoscope-BetterShifting -- Force proper shift usage
+ * Kaleidoscope-ProperShifting -- Force proper shift usage
  * Copyright (C) 2018 Jared Lindsay
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,20 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Kaleidoscope-BetterShifting.h"
+#include "Kaleidoscope-ProperShifting.h"
 
 namespace kaleidoscope {
 
-//BetterShifting
+//ProperShifting
 
 //Basic shifting ivars.
-bool BetterShifting::disabled = false;
-bool BetterShifting::left_shift_pressed = false;
-bool BetterShifting::right_shift_pressed = false;
+bool ProperShifting::disabled = false;
+bool ProperShifting::left_shift_pressed = false;
+bool ProperShifting::right_shift_pressed = false;
 
 //ivars for special modifier key rules
-int BetterShifting::num_modifiers_on = 0;
-uint16_t BetterShifting::modifiers[] = {
+int ProperShifting::num_modifiers_on = 0;
+uint16_t ProperShifting::modifiers[] = {
 	Key_LeftControl.raw, Key_LeftAlt.raw,
 	Key_LeftGui.raw, Key_RightGui.raw,
 	Key_RightAlt.raw, Key_RightControl.raw
@@ -37,19 +37,19 @@ uint16_t BetterShifting::modifiers[] = {
 #define NUM_MODIFIER_KEYS 6
 
 //basic accessor methods
-void BetterShifting::enable() {
+void ProperShifting::enable() {
 	disabled = false;
 }
 
-void BetterShifting::disable() {
+void ProperShifting::disable() {
 	disabled = true;
 }
 
-bool BetterShifting::isActive() {
+bool ProperShifting::isActive() {
 	return !disabled;
 }
 
-EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
+EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
 	static const int DIVIDER = COLS / 2;
 	static bool *shift_pressed;
 
@@ -101,7 +101,7 @@ EventHandlerResult BetterShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 }
 
 //Return true if the passed key.raw is a modifier.
-inline bool BetterShifting::keyIsModifier(uint16_t key) {
+inline bool ProperShifting::keyIsModifier(uint16_t key) {
 	static int i;
 	for(i = 0; i < NUM_MODIFIER_KEYS; i++) {
 		if(key == modifiers[i]) {
@@ -113,12 +113,12 @@ inline bool BetterShifting::keyIsModifier(uint16_t key) {
 
 // Legacy V1 API
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
-void BetterShifting::begin() {
+void ProperShifting::begin() {
   Kaleidoscope.useEventHandlerHook(legacyEventHandler);
 }
 
-Key BetterShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8_t keyState) {
-  EventHandlerResult r = ::BetterShifting.onKeyswitchEvent(mapped_key, row, col, keyState);
+Key ProperShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8_t keyState) {
+  EventHandlerResult r = ::ProperShifting.onKeyswitchEvent(mapped_key, row, col, keyState);
   if (r == EventHandlerResult::OK)
     return mapped_key;
   return Key_NoKey;
@@ -127,4 +127,4 @@ Key BetterShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8
 
 }
 
-kaleidoscope::BetterShifting BetterShifting;
+kaleidoscope::ProperShifting ProperShifting;

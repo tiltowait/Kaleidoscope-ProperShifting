@@ -1,6 +1,6 @@
-# Kaleidoscope-BetterShifting
+# Kaleidoscope-ProperShifting
 
-The BetterShifting plugin is a trainer to help you use your shift keys more properly. If you hold down the left shift, it disables input on the left half of the keyboard. Right shift disables the right half of the keyboard.
+The ProperShifting plugin is a trainer to help you use your shift keys more properly. If you hold down the left shift, it disables input on the left half of the keyboard. Right shift disables the right half of the keyboard.
 
 Holding both shift keys behaves like a shift-lock for as long as they're both held. This allows you to type IN ALL CAPS without giving your thumbs an obnoxious workout.
 
@@ -10,34 +10,34 @@ To use the plugin, just include the header and add it to the list of used plugin
 
 ```c++
 #include <Kaleidoscope.h>
-#include <Kaleidoscope-BetterShifting.h>
+#include <Kaleidoscope-ProperShifting.h>
 
-KALEIDOSCOPE_INIT_PLUGINS(BetterShifting);
+KALEIDOSCOPE_INIT_PLUGINS(ProperShifting);
 
 void setup() {
   Kaleidoscope.setup();
-  BetterShifting.ignoreKeys(2, Key_A.raw, Key_B.raw);
+  ProperShifting.ignoreKeys(2, Key_A.raw, Key_B.raw);
 }
 ```
 
 ## Plugin Methods
 
-The plugin provides the `BetterShifting` object, with the following methods:
+The plugin provides the `ProperShifting` object, with the following methods:
 
 ### `.enable()`
 
-> Enable the BetterShifting plugin.
+> Enable the ProperShifting plugin.
 >
 > The default behavior is `enabled`.
 
 ### `.disable()`
 
-> Disable the BetterShifting plugin.
+> Disable the ProperShifting plugin.
 
 ### `.isActive()`
 
-> This method returns `true` if BetterShifting is enabled and `false` if
-> BetterShifting is disabled.
+> This method returns `true` if ProperShifting is enabled and `false` if
+> ProperShifting is disabled.
 
 ### `.enableModifierRules()`
 
