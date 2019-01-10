@@ -23,31 +23,32 @@
 namespace kaleidoscope {
 
 class ProperShifting : public kaleidoscope::Plugin {
-	public:
-		ProperShifting(void) {}
-		~ProperShifting(void) {}
+  public:
+    ProperShifting(void) {}
+    ~ProperShifting(void) {}
 
-		static void enable(void);
-		static void disable(void);
-		static bool isActive(void);
+    static void enable(void);
+    static void disable(void);
+    static bool isActive(void);
 
-		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
+    EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
 
-	private:
-		static bool disabled;
+  private:
+    static bool disabled;
 
-		// Shift state
-		static bool left_shift_pressed;
-		static bool right_shift_pressed;
-		static bool keys_cleared;
+    // Shift state
+    static bool left_shift_on;
+    static bool right_shift_on;
+    static bool allow_events;
 
-		static uint16_t modifiers[];
-		static int num_modifiers_on;
-		inline bool keyIsModifier(uint16_t key);
+    static uint16_t modifiers[];
+    static int active_modifiers;
+    inline bool keyIsModifier(uint16_t key);
 
 #define keyIsShift(key) (key == Key_LeftShift || key == Key_RightShift)
-#define modifiersPressed() (num_modifiers_on > 0)
-#define shiftsIdentical() (left_shift_pressed == right_shift_pressed)
+#define modifiersPressed() (active_modifiers > 0)
+#define shiftsIdentical() (left_shift_on == right_shift_on)
+#define keysCleared() (KeyboardHardware.pressedKeyswitchCount())
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:

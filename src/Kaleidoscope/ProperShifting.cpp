@@ -24,104 +24,104 @@ namespace kaleidoscope {
 
 //Basic shifting ivars.
 bool ProperShifting::disabled = false;
-bool ProperShifting::left_shift_pressed = false;
-bool ProperShifting::right_shift_pressed = false;
-bool ProperShifting::keys_cleared = true;
+bool ProperShifting::left_shift_on = false;
+bool ProperShifting::right_shift_on = false;
+bool ProperShifting::allow_events = true;
 
 //ivars for special modifier key rules
-int ProperShifting::num_modifiers_on = 0;
+int ProperShifting::active_modifiers = 0;
 uint16_t ProperShifting::modifiers[] = {
-	Key_LeftControl.raw, Key_LeftAlt.raw,
-	Key_LeftGui.raw, Key_RightGui.raw,
-	Key_RightAlt.raw, Key_RightControl.raw
+  Key_LeftControl.raw, Key_LeftAlt.raw,
+  Key_LeftGui.raw, Key_RightGui.raw,
+  Key_RightAlt.raw, Key_RightControl.raw
 };
 #define NUM_MODIFIER_KEYS 6
 
 //basic accessor methods
 void ProperShifting::enable() {
-	disabled = false;
+  disabled = false;
 }
 
 void ProperShifting::disable() {
-	disabled = true;
+  disabled = true;
 }
 
 bool ProperShifting::isActive() {
-	return !disabled;
+  return !disabled;
 }
 
 EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
-	static const int DIVIDER = COLS / 2;
+  static const int DIVIDER = COLS / 2;
 
-	if(disabled) {
-		return EventHandlerResult::OK;
-	}
+  if(disabled) {
+    return EventHandlerResult::OK;
+  }
 
-	if(keyIsShift(mapped_key)) {
-		if(keyToggledOn(key_state)) {
-			if(mapped_key == Key_LeftShift) {
-				left_shift_pressed = true;
-			} else {
-				right_shift_pressed = true;
-			}
-		} else if(keyToggledOff(key_state)) {
-			if(mapped_key == Key_LeftShift) {
-				left_shift_pressed = false;
-			} else {
-				right_shift_pressed = false;
-			}
+  if(keyIsShift(mapped_key)) {
+    if(keyToggledOn(key_state)) {
+      if(mapped_key == Key_LeftShift) {
+        left_shift_on = true;
+      } else {
+        right_shift_on = true;
+      }
+    } else if(keyToggledOff(key_state)) {
+      if(mapped_key == Key_LeftShift) {
+        left_shift_on = false;
+      } else {
+        right_shift_on = false;
+      }
 
-			if(shiftsIdentical()) { //Are both shifts OFF?
-				keys_cleared = KeyboardHardware.pressedKeyswitchCount() == 0;
-			}
-		}
-		return EventHandlerResult::OK;
-	} else if(keyIsModifier(mapped_key.raw)) {
-		if(keyToggledOn(key_state)) {
-			num_modifiers_on++;
-		} else if(keyToggledOff(key_state)) {
-			num_modifiers_on--;
-		}
-		return EventHandlerResult::OK;
-	}
+      if(shiftsIdentical()) { //Are both shifts OFF?
+        allow_events = keysCleared(); //KeyboardHardware.pressedKeyswitchCount() == 0;
+      }
+    }
+    return EventHandlerResult::OK;
+  } else if(keyIsModifier(mapped_key.raw)) {
+    if(keyToggledOn(key_state)) {
+      active_modifiers++;
+    } else if(keyToggledOff(key_state)) {
+      active_modifiers--;
+    }
+    return EventHandlerResult::OK;
+  }
 
-	/* Start looking at normal keys */
+  /* Start looking at normal keys */
 
-	/**
-	 * We want to avoid a weird situation where spurious lowercase letters
-	 * appear. This can happen if you hold Shift, then a letter, then release
-	 * that letter (all on same side of keyboard). To avoid this, we require
-	 * all keys to be released whenever a shift is toggled off.
-	 */
-	if(!keys_cleared) {
-		keys_cleared = KeyboardHardware.pressedKeyswitchCount() == 0;
-		return EventHandlerResult::EVENT_CONSUMED;
-	}
+  /**
+   * We want to avoid a weird situation where spurious lowercase letters
+   * appear. This can happen if you hold Shift, then a letter, then release
+   * that letter (all on same side of keyboard). To avoid this, we require
+   * all keys to be released whenever a shift is toggled off.
+   */
+  if(!allow_events) {
+    allow_events = keysCleared(); //KeyboardHardware.pressedKeyswitchCount() == 0;
+    return EventHandlerResult::EVENT_CONSUMED;
+  }
 
-	if(shiftsIdentical() || modifiersPressed()) {
-		return EventHandlerResult::OK;
-	}
+  if(shiftsIdentical() || modifiersPressed()) {
+    return EventHandlerResult::OK;
+  }
 
-	//left side
-	if(left_shift_pressed && col < DIVIDER) {
-		return EventHandlerResult::EVENT_CONSUMED;
-	}
-	//right side
-	if(right_shift_pressed && DIVIDER < col) {
-		return EventHandlerResult::EVENT_CONSUMED;
-	}
-	return EventHandlerResult::OK;
+  //left side
+  if(left_shift_on && col < DIVIDER) {
+    return EventHandlerResult::EVENT_CONSUMED;
+  }
+  //right side
+  if(right_shift_on && DIVIDER < col) {
+    return EventHandlerResult::EVENT_CONSUMED;
+  }
+  return EventHandlerResult::OK;
 }
 
 //Return true if the passed key.raw is a modifier.
 inline bool ProperShifting::keyIsModifier(uint16_t key) {
-	static int i;
-	for(i = 0; i < NUM_MODIFIER_KEYS; i++) {
-		if(key == modifiers[i]) {
-			return true;
-		}
-	}
-	return false;
+  static int i;
+  for(i = 0; i < NUM_MODIFIER_KEYS; i++) {
+    if(key == modifiers[i]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 // Legacy V1 API
