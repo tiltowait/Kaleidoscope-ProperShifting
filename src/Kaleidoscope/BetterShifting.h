@@ -18,29 +18,20 @@
 
 #pragma once
 
-#include <Kaleidoscope.h>
+#include "Kaleidoscope.h"
 
 namespace kaleidoscope {
 
 class BetterShifting : public kaleidoscope::Plugin {
 	public:
 		BetterShifting(void) {}
-		~BetterShifting(void) {
-			clearIgnoredKeys();
-		}
+		~BetterShifting(void) {}
 
 		static void enable(void);
 		static void disable(void);
 		static bool isActive(void);
 
-		static void enableModifierRules(void);
-		static void disableModifierRules(void);
-		static bool modifiersIgnoreShifting(void);
-
 		EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
-
-		static void ignoreKeys(int num_keys, ...);
-		static void clearIgnoredKeys();
 
 	private:
 		static bool disabled;
@@ -49,17 +40,13 @@ class BetterShifting : public kaleidoscope::Plugin {
 		static bool left_shift_pressed;
 		static bool right_shift_pressed;
 
-		// Key ignores
-		static uint16_t *ignored_keys;
-		static int num_ignored_keys;
-		inline bool keyIsIgnored(uint16_t key);
-
-		static bool mods_ignore_shifting;
 		static uint16_t modifiers[];
 		static int num_modifiers_on;
 		inline bool keyIsModifier(uint16_t key);
 
-		#define MOD_OVERRIDE() (mods_ignore_shifting && num_modifiers_on > 0)
+#define keyIsShift(key) (key == Key_LeftShift || key == Key_RightShift)
+#define modifiersPressed() (num_modifiers_on > 0)
+#define shiftsIdentical() (left_shift_pressed == right_shift_pressed)
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
