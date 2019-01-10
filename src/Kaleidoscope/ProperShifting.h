@@ -39,6 +39,7 @@ class ProperShifting : public kaleidoscope::Plugin {
 		// Shift state
 		static bool left_shift_pressed;
 		static bool right_shift_pressed;
+		static bool keys_cleared;
 
 		static uint16_t modifiers[];
 		static int num_modifiers_on;

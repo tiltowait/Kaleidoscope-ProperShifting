@@ -26,6 +26,7 @@ namespace kaleidoscope {
 bool ProperShifting::disabled = false;
 bool ProperShifting::left_shift_pressed = false;
 bool ProperShifting::right_shift_pressed = false;
+bool ProperShifting::keys_cleared = true;
 
 //ivars for special modifier key rules
 int ProperShifting::num_modifiers_on = 0;
@@ -51,30 +52,31 @@ bool ProperShifting::isActive() {
 
 EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
 	static const int DIVIDER = COLS / 2;
-	static bool *shift_pressed;
 
 	if(disabled) {
 		return EventHandlerResult::OK;
 	}
 
-	//If a shift's key_state has been altered, store the change and exit
 	if(keyIsShift(mapped_key)) {
-		if(mapped_key == Key_LeftShift) {
-			shift_pressed = &left_shift_pressed;
-		} else {
-			shift_pressed = &right_shift_pressed;
-		}
-
 		if(keyToggledOn(key_state)) {
-			*shift_pressed = true;
+			if(mapped_key == Key_LeftShift) {
+				left_shift_pressed = true;
+			} else {
+				right_shift_pressed = true;
+			}
 		} else if(keyToggledOff(key_state)) {
-			*shift_pressed = false;
+			if(mapped_key == Key_LeftShift) {
+				left_shift_pressed = false;
+			} else {
+				right_shift_pressed = false;
+			}
+
+			if(shiftsIdentical()) { //Are both shifts OFF?
+				keys_cleared = KeyboardHardware.pressedKeyswitchCount() == 0;
+			}
 		}
 		return EventHandlerResult::OK;
-	}
-
-	//Modifier keys (alt, ctrl, etc.) override shifting rules.
-	if(keyIsModifier(mapped_key.raw)) {
+	} else if(keyIsModifier(mapped_key.raw)) {
 		if(keyToggledOn(key_state)) {
 			num_modifiers_on++;
 		} else if(keyToggledOff(key_state)) {
@@ -83,20 +85,31 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 		return EventHandlerResult::OK;
 	}
 
-	//Allow any keypress if modifiers are being held or if both shifts
-	//are the same (both off or both on).
-	if(modifiersPressed() || shiftsIdentical()) {
+	/* Start looking at normal keys */
+
+	/**
+	 * We want to avoid a weird situation where spurious lowercase letters
+	 * appear. This can happen if you hold Shift, then a letter, then release
+	 * that letter (all on same side of keyboard). To avoid this, we require
+	 * all keys to be released whenever a shift is toggled off.
+	 */
+	if(!keys_cleared) {
+		keys_cleared = KeyboardHardware.pressedKeyswitchCount() == 0;
+		return EventHandlerResult::EVENT_CONSUMED;
+	}
+
+	if(shiftsIdentical() || modifiersPressed()) {
 		return EventHandlerResult::OK;
 	}
 
-	//Don't allow left half + left shift, nor right half + right shift
+	//left side
 	if(left_shift_pressed && col < DIVIDER) {
 		return EventHandlerResult::EVENT_CONSUMED;
-	} else if(right_shift_pressed && DIVIDER < col) {
+	}
+	//right side
+	if(right_shift_pressed && DIVIDER < col) {
 		return EventHandlerResult::EVENT_CONSUMED;
 	}
-
-	//mapped_key is on the opposite side from the held shift, which is okay
 	return EventHandlerResult::OK;
 }
 
