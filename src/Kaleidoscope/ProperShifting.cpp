@@ -96,8 +96,6 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
   if(!allow_events) {
     allow_events = keysCleared();
     return EventHandlerResult::EVENT_CONSUMED;
-  } else {
-    active_modifiers = 0; //kludge to fix issue with Qukeys
   }
 
   if(shiftsIdentical() || modifiersPressed()) {
