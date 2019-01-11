@@ -22,9 +22,9 @@ using namespace kaleidoscope::hid;
 
 namespace kaleidoscope {
 
-//ProperShifting
+// ProperShifting
 
-//Basic shifting ivars.
+// Basic shifting ivars.
 bool ProperShifting::disabled = false;
 bool ProperShifting::allow_events = true;
 
@@ -69,7 +69,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    * Holding *any* non-shift modifier negates all shifting rules, so
    * we test that first in order to succeed early, if possible.
    */
-  if(anyModifiersActive()) {
+  if(mapped_key == Key_Spacebar || anyModifiersActive()) {
     return EventHandlerResult::OK;
   }
 
@@ -85,28 +85,28 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    */
   if(!allow_events) {
     allow_events = keysCleared();
-    return EventHandlerResult::OK;
+    return EventHandlerResult::EVENT_CONSUMED;
   }
 
   if(keyIsShift(mapped_key)) {
     if(keyToggledOff(key_state)) {
       allow_events = keysCleared();
     }
-    return EventHandlerResult::OK; //All shift events are allowed
+    return EventHandlerResult::OK; // All shift events are allowed
   }
 
   /**
    * Shift rules only take effect when one shift is active AND
    * no other modifiers are active.
    */
-  if(!keyIsShift(mapped_key) && !keyIsModifier(mapped_key)) { //2nd test may not be necessary; test
+  if(!keyIsModifier(mapped_key)) {
     if(!bothShiftsActive()) {
-      //Left shift -> only right-side keys allowed
+      // Left shift -> only right-side keys allowed
       if(isModifierKeyActive(Key_LeftShift) && col < DIVIDER) {
         return EventHandlerResult::EVENT_CONSUMED;
       }
 
-      //Right shift -> only left-side keys allowed
+      // Right shift -> only left-side keys allowed
       if(isModifierKeyActive(Key_RightShift) && DIVIDER < col) {
         return EventHandlerResult::EVENT_CONSUMED;
       }
