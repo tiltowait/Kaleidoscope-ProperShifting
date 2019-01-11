@@ -28,7 +28,11 @@ namespace kaleidoscope {
 bool ProperShifting::disabled = false;
 bool ProperShifting::allow_events = true;
 
-//ivars for special modifier key rules
+/**
+ * For our purposes, a modifier is Control, Alt, and GUI.
+ * Though shift is technically a modifier, it is a special
+ * case and treated separately.
+ */
 Key ProperShifting::modifiers[] = {
   Key_LeftControl, Key_RightControl,
   Key_LeftAlt, Key_RightAlt,
@@ -36,7 +40,9 @@ Key ProperShifting::modifiers[] = {
 };
 #define NUM_MODIFIERS 6
 
-//basic accessor methods
+/**
+ * Basic accessor methods.
+ */
 void ProperShifting::enable() {
   disabled = false;
 }
@@ -49,6 +55,9 @@ bool ProperShifting::isActive() {
   return !disabled;
 }
 
+/**
+ * The main event.
+ */
 EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
   static const int DIVIDER = COLS / 2;
 
@@ -56,8 +65,42 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
     return EventHandlerResult::OK;
   }
 
-  if(!keyIsShift(mapped_key) && !keyIsModifier(mapped_key)) {
-    if(!bothShiftsActive() && !anyModifiersActive()) {
+  /**
+   * Holding *any* non-shift modifier negates all shifting rules, so
+   * we test that first in order to succeed early, if possible.
+   */
+  if(anyModifiersActive()) {
+    return EventHandlerResult::OK;
+  }
+
+  /**
+   * If the user is typing rapidly and uses the wrong shift, it's
+   * possible for a lowercase version of the letter to appear. This
+   * happens if the shift key is released before the letter key. In
+   * that circumstance, we need to lock out keyboard use until the
+   * user releases all keys.
+   * 
+   * As is always the case, however, holding *any* modifier ignores
+   * this rule.
+   */
+  if(!allow_events) {
+    allow_events = keysCleared();
+    return EventHandlerResult::OK;
+  }
+
+  if(keyIsShift(mapped_key)) {
+    if(keyToggledOff(key_state)) {
+      allow_events = keysCleared();
+    }
+    return EventHandlerResult::OK; //All shift events are allowed
+  }
+
+  /**
+   * Shift rules only take effect when one shift is active AND
+   * no other modifiers are active.
+   */
+  if(!keyIsShift(mapped_key) && !keyIsModifier(mapped_key)) { //2nd test may not be necessary; test
+    if(!bothShiftsActive()) {
       //Left shift -> only right-side keys allowed
       if(isModifierKeyActive(Key_LeftShift) && col < DIVIDER) {
         return EventHandlerResult::EVENT_CONSUMED;
@@ -70,6 +113,12 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
     }
   }
 
+  /**
+   * Possible states:
+   *  1. No shift and no modifiers held. (Print lowercase letter.)
+   *  2. Modifier being released.
+   *  3. Shift and opposite-side key pressed. (Print uppercase letter.)
+   */
   return EventHandlerResult::OK;
 }
 
