@@ -24,9 +24,7 @@ namespace kaleidoscope {
 
 // ProperShifting
 
-// Basic shifting ivars.
 bool ProperShifting::disabled = false;
-bool ProperShifting::allow_events = true;
 
 /**
  * For our purposes, a modifier is Control, Alt, and GUI.
@@ -69,30 +67,10 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    * Holding *any* non-shift modifier negates all shifting rules, so
    * we test that first in order to succeed early, if possible.
    */
-  if(mapped_key == Key_Spacebar || anyModifiersActive()) {
+  if(mapped_key == Key_Spacebar ||
+     keyIsShift(mapped_key) ||
+     anyModifiersActive()) {
     return EventHandlerResult::OK;
-  }
-
-  /**
-   * If the user is typing rapidly and uses the wrong shift, it's
-   * possible for a lowercase version of the letter to appear. This
-   * happens if the shift key is released before the letter key. In
-   * that circumstance, we need to lock out keyboard use until the
-   * user releases all keys.
-   * 
-   * As is always the case, however, holding *any* modifier ignores
-   * this rule.
-   */
-  if(!allow_events) {
-    allow_events = keysCleared();
-    return EventHandlerResult::EVENT_CONSUMED;
-  }
-
-  if(keyIsShift(mapped_key)) {
-    if(keyToggledOff(key_state)) {
-      allow_events = keysCleared();
-    }
-    return EventHandlerResult::OK; // All shift events are allowed
   }
 
   /**

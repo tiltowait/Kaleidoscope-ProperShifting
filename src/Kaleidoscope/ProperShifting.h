@@ -36,9 +36,6 @@ class ProperShifting : public kaleidoscope::Plugin {
   private:
     static bool disabled;
 
-    // Shift state
-    static bool allow_events;
-
     static Key modifiers[];
     inline bool keyIsModifier(Key key);
     inline bool anyModifiersActive();
