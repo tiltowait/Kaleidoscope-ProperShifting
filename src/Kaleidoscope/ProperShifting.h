@@ -37,12 +37,12 @@ class ProperShifting : public kaleidoscope::Plugin {
     static bool disabled;
 
     static Key modifiers[];
-    inline bool keyIsModifier(Key key);
+    inline bool isKeyModifier(Key key);
     inline bool anyModifiersActive();
     inline bool bothShiftsActive();
+    inline bool isKeyBlessed(Key key);
 
-#define keyIsShift(key) (key == Key_LeftShift || key == Key_RightShift)
-#define keysCleared() (KeyboardHardware.pressedKeyswitchCount() == 0)
+#define isKeyShift(key) (key == Key_LeftShift || key == Key_RightShift)
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:

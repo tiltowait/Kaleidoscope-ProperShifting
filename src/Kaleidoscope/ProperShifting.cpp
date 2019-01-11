@@ -67,9 +67,9 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    * Holding *any* non-shift modifier negates all shifting rules, so
    * we test that first in order to succeed early, if possible.
    */
-  if(mapped_key == Key_Spacebar ||
-     keyIsShift(mapped_key) ||
-     anyModifiersActive()) {
+  if(isKeyBlessed(mapped_key) ||
+     anyModifiersActive() ||
+     bothShiftsActive()) {
     return EventHandlerResult::OK;
   }
 
@@ -77,18 +77,14 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    * Shift rules only take effect when one shift is active AND
    * no other modifiers are active.
    */
-  if(!keyIsModifier(mapped_key)) {
-    if(!bothShiftsActive()) {
-      // Left shift -> only right-side keys allowed
-      if(isModifierKeyActive(Key_LeftShift) && col < DIVIDER) {
-        return EventHandlerResult::EVENT_CONSUMED;
-      }
+  // Left shift -> only right-side keys allowed
+  if(isModifierKeyActive(Key_LeftShift) && col < DIVIDER) {
+    return EventHandlerResult::EVENT_CONSUMED;
+  }
 
-      // Right shift -> only left-side keys allowed
-      if(isModifierKeyActive(Key_RightShift) && DIVIDER < col) {
-        return EventHandlerResult::EVENT_CONSUMED;
-      }
-    }
+  // Right shift -> only left-side keys allowed
+  if(isModifierKeyActive(Key_RightShift) && DIVIDER < col) {
+    return EventHandlerResult::EVENT_CONSUMED;
   }
 
   /**
@@ -104,14 +100,13 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
  * The following methods test modifier states/identities.
  */
 
-inline bool ProperShifting::keyIsModifier(Key key) {
-  static int i;
-  for(i = 0; i < NUM_MODIFIERS; i++) {
-    if(key == modifiers[i]) {
-      return true;
-    }
-  }
-  return false;
+inline bool ProperShifting::isKeyModifier(Key key) {
+  // If it's not a keyboard key, return false
+  if(key.flags & (SYNTHETIC | RESERVED)) return false;
+  if(isKeyShift(key)) return false;
+
+  return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER &&
+          key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
 }
 
 inline bool ProperShifting::anyModifiersActive() {
@@ -127,6 +122,16 @@ inline bool ProperShifting::anyModifiersActive() {
 inline bool ProperShifting::bothShiftsActive() {
   return isModifierKeyActive(Key_LeftShift) &&
          isModifierKeyActive(Key_RightShift);
+}
+
+/**
+ * A "blessed" key is one whose event is always allowed to go through,
+ * no matter what. Current blessed keys are space, shifts, and modifiers.
+ */
+inline bool ProperShifting::isKeyBlessed(Key key) {
+  return (key == Key_Spacebar ||
+          isKeyShift(key) ||
+          isKeyModifier(key));
 }
 
 // Legacy V1 API
