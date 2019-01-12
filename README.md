@@ -45,7 +45,7 @@ The plugin provides the `ProperShifting` object, with the following methods:
 
 > Disable the ProperShifting plugin.
 
-#### `.isActive()`
+#### `.active()`
 
 > This method returns `true` if ProperShifting is enabled and `false` if
 > ProperShifting is disabled.
