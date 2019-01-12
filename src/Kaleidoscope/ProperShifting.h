@@ -25,27 +25,35 @@ namespace plugin {
 
 class ProperShifting : public kaleidoscope::Plugin {
   public:
-    ProperShifting(void) {}
-    ~ProperShifting(void) {}
-
+    // Methods relating to plugin state.
     static void enable(void);
     static void disable(void);
-    static bool isActive(void);
+    static bool active(void);
 
-    EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
+    // Event-handler methods.
+    EventHandlerResult beforeEachCycle();
+    EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row,
+                                        byte col, uint8_t key_state);
 
   private:
     static bool disabled_;
-    enum active_shifts_t : int;
-    static Key modifiers_[];
+    static bool allow_events_;
+    static Key modifiers_[];  // Modifier keys, such as Contol or Alt.
 
+    // Key introspection methods.
     inline bool isKeyModifier(Key key);
     inline bool anyModifiersActive();
     inline int whichShiftActive();
 
+    // Determine if key `key` is a shift.
     inline bool isKeyShift(Key key) {
-      return key == Key_LeftShift ||
-             key == Key_RightShift;
+      return key == Key_LeftShift
+             && key == Key_RightShift;
+    }
+
+    // Determine if ANY key is being pressed.
+    inline bool anyKeyPressed() {
+      return KeyboardHardware.pressedKeyswitchCount() != 0;
     }
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
@@ -55,7 +63,8 @@ class ProperShifting : public kaleidoscope::Plugin {
 #endif
 
 };
-} // namespace plugin
-} // namespace kaleidoscope
+
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 extern kaleidoscope::plugin::ProperShifting ProperShifting;

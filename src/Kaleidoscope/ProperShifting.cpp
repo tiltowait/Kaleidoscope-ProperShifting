@@ -26,95 +26,135 @@ namespace plugin {
 // ProperShifting
 
 bool ProperShifting::disabled_ = false;
-enum { LEFT, RIGHT, BOTH, NONE }; // Active shift key
+bool ProperShifting::allow_events_ = true;
 
-/**
- * For our purposes, a modifier is Control, Alt, and GUI.
- * Though shift is technically a modifier, it is a special
- * case and treated separately.
- */
+enum { LEFT, RIGHT, BOTH, NONE };  // Currently active shift key(s).
+
+// For our purposes, a modifier is Control, Alt, and GUI. Though shift
+// is technically a modifier, it is a special case and is treated
+// separately.
 Key ProperShifting::modifiers_[] = {
   Key_LeftControl, Key_RightControl,
   Key_LeftAlt, Key_RightAlt,
   Key_LeftGui, Key_RightGui
 };
-static const int kNumModifiers = 6;
+static const int kNumModifiers = 6;  // Used for lopping through modifier
+                                     // array.
 
-/**
- * Basic accessor methods.
- */
+// Basic accessor methods.
 void ProperShifting::enable() {
   disabled_ = false;
 }
 
 void ProperShifting::disable() {
   disabled_ = true;
+  allow_events_ = true;
 }
 
-bool ProperShifting::isActive() {
+bool ProperShifting::active() {
   return !disabled_;
 }
 
-/**
- * The main event.
- */
-EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
-  /**
-   * Holding *any* non-shift modifier negates all shifting rules, so
-   * we test that first in order to succeed early, if possible.
-   */
-  if(disabled_ ||
-     mapped_key == Key_Spacebar ||
-     isKeyShift(mapped_key) ||
-     isKeyModifier(mapped_key) ||
-     anyModifiersActive() ||
-     whichShiftActive() == BOTH) {
+// A fast typist trying to capitalize a letter with the wrong shift can
+// sometimes wind up typing that letter in lowercase. This happens when
+// the following order of events takes place:
+//   
+//   1. Hold shift
+//   2. Press a letter
+//   3. Release shift
+//   4. Release the letter
+//
+// This is a surprisingly common occurrence. To combat this, every time
+// a shift key is released, we check to see if any other letters are being
+// held. If that is the case, we put the keyboard into a "no events" state
+// until all keys are released.
+//
+// We check the keyboard state between cycles; otherwise, we wind up
+// consuming desired keyswitch events.
+EventHandlerResult ProperShifting::beforeEachCycle() {
+  if(!allow_events_) {
+    allow_events_ = !anyKeyPressed();
+  }
+  return EventHandlerResult::OK;
+}
+
+// Prevent the user from typing an uppercase letter while holding the
+// shift key on the same side as that letter; however, allow it if the
+// user is also holding a non-shift modifier of any kind.
+//
+// Also, allow a semi-capslock mode when both shifts are being held.
+EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
+                                                    byte row,
+                                                    byte col,
+                                                    uint8_t key_state) {
+  // Disabling the plugin will set allowed_events_ to true, so it's safe
+  // to test for it before anything else. Otherwise, we wind up with 
+  if(!allow_events_) {
+    return EventHandlerResult::EVENT_CONSUMED;
+  }
+
+  // Holding *any* non-shift modifier negates all shifting rules, so
+  // we test that first in order to succeed early, if possible.
+  if(disabled_
+     || isKeyModifier(mapped_key)
+     || anyModifiersActive()  // One may be activated in a previous cycle.
+     || whichShiftActive() == BOTH) {
     return EventHandlerResult::OK;
   }
 
-  /**
-   * Shift rules only take effect when one shift is active AND
-   * no other modifiers are active.
-   */
+  // Shift events are always allowed, but we need to make sure the
+  // keyboard is clear every time a shift is toggled off. See above for
+  // more information why.
+  if(isKeyShift(mapped_key)) {
+    if(keyToggledOff(key_state)) {
+      allow_events_ = !anyKeyPressed();
+    }
+    return EventHandlerResult::OK;
+  }
+
+  // Each half of the Model 01 has an equal number of keys, so we can
+  // use the midpoint as a dividing line to determine whether to allow
+  // a shift to occur.
   static const int kDivider = COLS / 2;
 
+  // Shift rules only take effect when one shift is active AND no other
+  // modifiers are active. We already tested for BOTH shifts above.
   switch(whichShiftActive()) {
-  case LEFT: // Only right-side keys allowed
+  case LEFT:  // Only right-side keys allowed
     if(col < kDivider) {
       return EventHandlerResult::EVENT_CONSUMED;
     }
     break;
-  case RIGHT: // Only left-side keys allowed
-    if(kDivider < col) {
+  case RIGHT:  // Only left-side keys allowed
+    if(kDivider <= col) {
       return EventHandlerResult::EVENT_CONSUMED;
     }
     break;
-  default: // Really just case NONE, since BOTH is handled above
+  default:  // Really just case NONE, since BOTH is already handled.
     break;
   }
 
-  /**
-   * Possible states:
-   *  1. No shift and no modifiers held. (Print lowercase letter.)
-   *  2. Shift and opposite-side key pressed. (Print uppercase letter.)
-   *  All other cases should already be handled.
-   */
+  // Possible states:
+  //   1. No shift and no modifiers held. (Print lowercase letter.)
+  //   2. Shift and opposite-side key pressed. (Print uppercase letter.)
+  // All other cases should already be handled.
   return EventHandlerResult::OK;
 }
 
-/**
- * The following methods test modifier states/identities.
- */
+// The following methods test modifier states/identities.
 
+// Determine if a given key is a non-shift modifier.
 inline bool ProperShifting::isKeyModifier(Key key) {
   // If it's not a keyboard key, return false
   if(key.flags & (SYNTHETIC | RESERVED)) return false;
-  if(isKeyShift(key)) return false; // Don't consider space a modifier
+  if(isKeyShift(key)) return false;  // Don't consider space a modifier
 
-  return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER &&
-          key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
+  return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER
+          && key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
 }
 
+// Determine if any non-shift modifiers are active.
+// TODO: See if there's a more efficient way of doing this.
 inline bool ProperShifting::anyModifiersActive() {
   static int i;
   for(i = 0; i < kNumModifiers; i++) {
@@ -125,9 +165,10 @@ inline bool ProperShifting::anyModifiersActive() {
   return false;
 }
 
+// Determine which shift key (if any, or both) is currently active.
 inline int ProperShifting::whichShiftActive() {
-  if(wasModifierKeyActive(Key_LeftShift) &&
-     wasModifierKeyActive(Key_RightShift)) {
+  if(wasModifierKeyActive(Key_LeftShift)
+     && wasModifierKeyActive(Key_RightShift)) {
     return BOTH;
   } else if(wasModifierKeyActive(Key_LeftShift)) {
     return LEFT;
@@ -151,7 +192,7 @@ Key ProperShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8
 }
 #endif
 
-} // namespace plugin
-} // namespace kaleidoscope
+}  // namespace plugin
+}  // namespace kaleidoscope
 
 kaleidoscope::plugin::ProperShifting ProperShifting;
