@@ -50,6 +50,8 @@ The plugin provides the `ProperShifting` object, with the following methods:
 > This method returns `true` if ProperShifting is enabled and `false` if
 > ProperShifting is disabled.
 
-## Dependencies
+## Conflicts and Limitations
 
-Nothing beyond the Kaleidoscope core.
+ProperShifting will not work correctly with a plugin that injects shifts, such as SpaceCadet and Qukeys. This is because ProperShifting can only detect if shift has been *pressed*, not if it's been injected.
+
+Additionally, ProperShifting is only active on layer zero. This is because momentary toggling of an alternate layer in order to input a shifted character (such as a curly brace in the default keymap) will sometimes result in the keyboard becoming locked in that alternate layer.

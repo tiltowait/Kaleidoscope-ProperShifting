@@ -90,6 +90,12 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   // Disabling the plugin will set allowed_events_ to true, so it's safe
   // to test for it before anything else. Otherwise, we wind up with 
   if(!allow_events_) {
+    // The word, "I", can cause problems, because the cycle for typing it
+    // often follows the sequence: Shift on, I, Shift off, Space. If that
+    // happens, the space will be erroneously consumed.
+    if(mapped_key == Key_Spacebar) {
+      return EventHandlerResult::OK;
+    }
     return EventHandlerResult::EVENT_CONSUMED;
   }
 
@@ -97,6 +103,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   // we test that first in order to succeed early, if possible.
   if(disabled_
      || isKeyModifier(mapped_key)
+     || Layer.top() != 0  // Prevents issues with '{' and '}' on default keymap.
      || anyModifiersActive()  // One may be activated in a previous cycle.
      || whichShiftActive() == BOTH) {
     return EventHandlerResult::OK;
