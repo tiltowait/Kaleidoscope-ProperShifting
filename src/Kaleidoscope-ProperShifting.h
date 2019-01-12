@@ -18,4 +18,4 @@
 
 #pragma once
 
-#include "Kaleidoscope/ProperShifting.h"
+#include <Kaleidoscope/ProperShifting.h>

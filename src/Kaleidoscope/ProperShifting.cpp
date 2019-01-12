@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "ProperShifting.h"
+#include <Kaleidoscope-ProperShifting.h>
 
 using namespace kaleidoscope::hid;
 
