@@ -58,9 +58,9 @@ class ProperShifting : public kaleidoscope::Plugin {
     }
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
- protected:
-  void begin();
-  static Key legacyEventHandler(Key mapped_key, byte row, byte col, uint8_t keyState);
+  protected:
+    void begin();
+    static Key legacyEventHandler(Key mapped_key, byte row, byte col, uint8_t keyState);
 #endif
 
 };
