@@ -43,7 +43,10 @@ class ProperShifting : public kaleidoscope::Plugin {
     inline bool anyModifiersActive();
     inline int whichShiftActive();
 
-#define isKeyShift(key) (key == Key_LeftShift || key == Key_RightShift)
+    inline bool isKeyShift(Key key) {
+      return key == Key_LeftShift ||
+             key == Key_RightShift;
+    }
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
  protected:
