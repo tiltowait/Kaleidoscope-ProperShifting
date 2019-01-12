@@ -21,6 +21,7 @@
 #include "Kaleidoscope.h"
 
 namespace kaleidoscope {
+namespace plugin {
 
 class ProperShifting : public kaleidoscope::Plugin {
   public:
@@ -34,13 +35,13 @@ class ProperShifting : public kaleidoscope::Plugin {
     EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state);
 
   private:
-    static bool disabled;
+    static bool disabled_;
+    enum active_shifts_t : int;
+    static Key modifiers_[];
 
-    static Key modifiers[];
     inline bool isKeyModifier(Key key);
     inline bool anyModifiersActive();
-    inline bool bothShiftsActive();
-    inline bool isKeyBlessed(Key key);
+    inline int whichShiftActive();
 
 #define isKeyShift(key) (key == Key_LeftShift || key == Key_RightShift)
 
@@ -51,6 +52,7 @@ class ProperShifting : public kaleidoscope::Plugin {
 #endif
 
 };
-}
+} // namespace plugin
+} // namespace kaleidoscope
 
-extern kaleidoscope::ProperShifting ProperShifting;
+extern kaleidoscope::plugin::ProperShifting ProperShifting;

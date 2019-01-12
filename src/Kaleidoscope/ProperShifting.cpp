@@ -21,55 +21,54 @@
 using namespace kaleidoscope::hid;
 
 namespace kaleidoscope {
+namespace plugin {
 
 // ProperShifting
 
-bool ProperShifting::disabled = false;
+bool ProperShifting::disabled_ = false;
+enum { LEFT, RIGHT, BOTH, NONE }; // Active shift key
 
 /**
  * For our purposes, a modifier is Control, Alt, and GUI.
  * Though shift is technically a modifier, it is a special
  * case and treated separately.
  */
-Key ProperShifting::modifiers[] = {
+Key ProperShifting::modifiers_[] = {
   Key_LeftControl, Key_RightControl,
   Key_LeftAlt, Key_RightAlt,
   Key_LeftGui, Key_RightGui
 };
-#define NUM_MODIFIERS 6
+static const int kNumModifiers = 6;
 
 /**
  * Basic accessor methods.
  */
 void ProperShifting::enable() {
-  disabled = false;
+  disabled_ = false;
 }
 
 void ProperShifting::disable() {
-  disabled = true;
+  disabled_ = true;
 }
 
 bool ProperShifting::isActive() {
-  return !disabled;
+  return !disabled_;
 }
 
 /**
  * The main event.
  */
 EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, byte col, uint8_t key_state) {
-  static const int DIVIDER = COLS / 2;
-
-  if(disabled) {
-    return EventHandlerResult::OK;
-  }
-
   /**
    * Holding *any* non-shift modifier negates all shifting rules, so
    * we test that first in order to succeed early, if possible.
    */
-  if(isKeyBlessed(mapped_key) ||
+  if(disabled_ ||
+     mapped_key == Key_Spacebar ||
+     isKeyShift(mapped_key) ||
+     isKeyModifier(mapped_key) ||
      anyModifiersActive() ||
-     bothShiftsActive()) {
+     whichShiftActive() == BOTH) {
     return EventHandlerResult::OK;
   }
 
@@ -77,21 +76,28 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
    * Shift rules only take effect when one shift is active AND
    * no other modifiers are active.
    */
-  // Left shift -> only right-side keys allowed
-  if(isModifierKeyActive(Key_LeftShift) && col < DIVIDER) {
-    return EventHandlerResult::EVENT_CONSUMED;
-  }
+  static const int kDivider = COLS / 2;
 
-  // Right shift -> only left-side keys allowed
-  if(isModifierKeyActive(Key_RightShift) && DIVIDER < col) {
-    return EventHandlerResult::EVENT_CONSUMED;
+  switch(whichShiftActive()) {
+  case LEFT: // Only right-side keys allowed
+    if(col < kDivider) {
+      return EventHandlerResult::EVENT_CONSUMED;
+    }
+    break;
+  case RIGHT: // Only left-side keys allowed
+    if(kDivider < col) {
+      return EventHandlerResult::EVENT_CONSUMED;
+    }
+    break;
+  default: // Really just case NONE, since BOTH is handled above
+    break;
   }
 
   /**
    * Possible states:
    *  1. No shift and no modifiers held. (Print lowercase letter.)
-   *  2. Modifier being released.
-   *  3. Shift and opposite-side key pressed. (Print uppercase letter.)
+   *  2. Shift and opposite-side key pressed. (Print uppercase letter.)
+   *  All other cases should already be handled.
    */
   return EventHandlerResult::OK;
 }
@@ -103,7 +109,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key, byte row, b
 inline bool ProperShifting::isKeyModifier(Key key) {
   // If it's not a keyboard key, return false
   if(key.flags & (SYNTHETIC | RESERVED)) return false;
-  if(isKeyShift(key)) return false;
+  if(isKeyShift(key)) return false; // Don't consider space a modifier
 
   return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER &&
           key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
@@ -111,27 +117,24 @@ inline bool ProperShifting::isKeyModifier(Key key) {
 
 inline bool ProperShifting::anyModifiersActive() {
   static int i;
-  for(i = 0; i < NUM_MODIFIERS; i++) {
-    if(isModifierKeyActive(modifiers[i])) {
+  for(i = 0; i < kNumModifiers; i++) {
+    if(wasModifierKeyActive(modifiers_[i])) {
       return true;
     }
   }
   return false;
 }
 
-inline bool ProperShifting::bothShiftsActive() {
-  return isModifierKeyActive(Key_LeftShift) &&
-         isModifierKeyActive(Key_RightShift);
-}
-
-/**
- * A "blessed" key is one whose event is always allowed to go through,
- * no matter what. Current blessed keys are space, shifts, and modifiers.
- */
-inline bool ProperShifting::isKeyBlessed(Key key) {
-  return (key == Key_Spacebar ||
-          isKeyShift(key) ||
-          isKeyModifier(key));
+inline int ProperShifting::whichShiftActive() {
+  if(wasModifierKeyActive(Key_LeftShift) &&
+     wasModifierKeyActive(Key_RightShift)) {
+    return BOTH;
+  } else if(wasModifierKeyActive(Key_LeftShift)) {
+    return LEFT;
+  } else if(wasModifierKeyActive(Key_RightShift)) {
+    return RIGHT;
+  }
+  return NONE;
 }
 
 // Legacy V1 API
@@ -148,6 +151,7 @@ Key ProperShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8
 }
 #endif
 
-}
+} // namespace plugin
+} // namespace kaleidoscope
 
-kaleidoscope::ProperShifting ProperShifting;
+kaleidoscope::plugin::ProperShifting ProperShifting;
