@@ -27,6 +27,7 @@ namespace plugin {
 
 bool ProperShifting::disabled_ = false;
 bool ProperShifting::allow_events_ = true;
+bool ProperShifting::last_event_allowed_ = false;
 
 enum { LEFT, RIGHT, BOTH, NONE };  // Currently active shift key(s).
 
@@ -109,11 +110,14 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
     return EventHandlerResult::OK;
   }
 
-  // Shift events are always allowed, but we need to make sure the
-  // keyboard is clear every time a shift is toggled off. See above for
-  // more information why.
+  // Shift events are always allowed, but we need to make sure the keyboard is
+  // clear every time a shift is toggled off. See above for more information.
+  //
+  // If the last event was allowed, however, we don't do anything. This is
+  // another protection for fast typists. Without that check, the 'a' in
+  // "Mariachi" (and possibly the 'r') would be consumed when typing ~100 wpm.
   if(isKeyShift(mapped_key)) {
-    if(keyToggledOff(key_state)) {
+    if(keyToggledOff(key_state) && !last_event_allowed_) {
       allow_events_ = noKeysPressed();
     }
     return EventHandlerResult::OK;
@@ -129,11 +133,13 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   switch(whichShiftActive()) {
   case LEFT:  // Only right-side keys allowed
     if(col < kDivider) {
+      last_event_allowed_ = false;
       return EventHandlerResult::EVENT_CONSUMED;
     }
     break;
   case RIGHT:  // Only left-side keys allowed
     if(kDivider <= col) {
+      last_event_allowed_ = false;
       return EventHandlerResult::EVENT_CONSUMED;
     }
     break;
@@ -145,6 +151,8 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   //   1. No shift and no modifiers held. (Print lowercase letter.)
   //   2. Shift and opposite-side key pressed. (Print uppercase letter.)
   // All other cases should already be handled.
+  last_event_allowed_ = true;
+
   return EventHandlerResult::OK;
 }
 

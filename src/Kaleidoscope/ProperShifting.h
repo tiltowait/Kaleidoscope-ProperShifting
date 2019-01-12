@@ -38,6 +38,7 @@ class ProperShifting : public kaleidoscope::Plugin {
   private:
     static bool disabled_;
     static bool allow_events_;
+    static bool last_event_allowed_;
     static Key modifiers_[];  // Modifier keys, such as Contol or Alt.
 
     // Key introspection methods.
