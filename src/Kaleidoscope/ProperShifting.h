@@ -48,12 +48,12 @@ class ProperShifting : public kaleidoscope::Plugin {
     // Determine if key `key` is a shift.
     inline bool isKeyShift(Key key) {
       return key == Key_LeftShift
-             && key == Key_RightShift;
+             || key == Key_RightShift;
     }
 
     // Determine if ANY key is being pressed.
-    inline bool anyKeyPressed() {
-      return KeyboardHardware.pressedKeyswitchCount() != 0;
+    inline bool noKeysPressed() {
+      return KeyboardHardware.pressedKeyswitchCount() == 0;
     }
 
 #if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API

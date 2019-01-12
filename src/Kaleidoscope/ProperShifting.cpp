@@ -73,7 +73,7 @@ bool ProperShifting::active() {
 // consuming desired keyswitch events.
 EventHandlerResult ProperShifting::beforeEachCycle() {
   if(!allow_events_) {
-    allow_events_ = !anyKeyPressed();
+    allow_events_ = noKeysPressed();
   }
   return EventHandlerResult::OK;
 }
@@ -107,7 +107,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   // more information why.
   if(isKeyShift(mapped_key)) {
     if(keyToggledOff(key_state)) {
-      allow_events_ = !anyKeyPressed();
+      allow_events_ = noKeysPressed();
     }
     return EventHandlerResult::OK;
   }
