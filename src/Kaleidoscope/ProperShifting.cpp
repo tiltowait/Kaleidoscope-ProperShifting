@@ -198,10 +198,13 @@ void ProperShifting::begin() {
   Kaleidoscope.useEventHandlerHook(legacyEventHandler);
 }
 
-Key ProperShifting::legacyEventHandler(Key mapped_key, byte row, byte col, uint8_t keyState) {
-  EventHandlerResult r = ::ProperShifting.onKeyswitchEvent(mapped_key, row, col, keyState);
-  if (r == EventHandlerResult::OK)
+Key ProperShifting::legacyEventHandler(Key mapped_key, byte row, byte col,
+                                       uint8_t keyState) {
+  EventHandlerResult r = ::ProperShifting.onKeyswitchEvent(mapped_key, row,
+                                                           col, keyState);
+  if (r == EventHandlerResult::OK) {
     return mapped_key;
+  }
   return Key_NoKey;
 }
 #endif
