@@ -55,14 +55,6 @@ class ProperShifting : public kaleidoscope::Plugin {
     inline bool noKeysPressed() {
       return KeyboardHardware.pressedKeyswitchCount() == 0;
     }
-
-#if KALEIDOSCOPE_ENABLE_V1_PLUGIN_API
-  protected:
-    void begin();
-    static Key legacyEventHandler(Key mapped_key, byte row, byte col,
-                                  uint8_t keyState);
-#endif
-
 };
 
 }  // namespace plugin
