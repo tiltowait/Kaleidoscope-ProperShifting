@@ -158,11 +158,11 @@ inline bool ProperShifting::isKeyModifier(Key key) {
 
 // Check a key's flags to see if a modifier is being held.
 inline bool ProperShifting::isModifierHeld(uint8_t flags) {
-  return flags & CTRL_HELD
+  return flags & SHIFT_HELD
+         || flags & GUI_HELD
          || flags & LALT_HELD
          || flags & RALT_HELD
-         || flags & SHIFT_HELD
-         || flags & GUI_HELD;
+         || flags & CTRL_HELD;
 }
 
 // Determine which shift key (if any, or both) is currently active.
