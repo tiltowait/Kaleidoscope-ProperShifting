@@ -38,11 +38,10 @@ class ProperShifting : public kaleidoscope::Plugin {
     static bool disabled_;
     static bool allow_events_;
     static bool last_event_allowed_;
-    static Key modifiers_[];  // Modifier keys, such as Contol or Alt.
 
     // Key introspection methods.
     inline bool isKeyModifier(Key key);
-    inline bool anyModifiersActive();
+    inline bool isModifierHeld(uint8_t flags);
     inline int whichShiftActive();
 
     // Determine if key `key` is a shift.

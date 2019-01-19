@@ -30,17 +30,6 @@ bool ProperShifting::last_event_allowed_ = false;
 
 enum { LEFT, RIGHT, BOTH, NONE };  // Currently active shift key(s).
 
-// For our purposes, a modifier is Control, Alt, and GUI. Though shift
-// is technically a modifier, it is a special case and is treated
-// separately.
-Key ProperShifting::modifiers_[] = {
-  Key_LeftControl, Key_RightControl,
-  Key_LeftAlt, Key_RightAlt,
-  Key_LeftGui, Key_RightGui
-};
-static const int kNumModifiers = 6;  // Used for lopping through modifier
-                                     // array.
-
 // Basic accessor methods.
 void ProperShifting::enable() {
   disabled_ = false;
@@ -104,7 +93,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   if(disabled_
      || isKeyModifier(mapped_key)
      || Layer.top() != 0  // Prevents issues with '{' and '}' on default keymap.
-     || anyModifiersActive()  // One may be activated in a previous cycle.
+     || isModifierHeld(mapped_key.flags)
      || whichShiftActive() == BOTH) {
     return EventHandlerResult::OK;
   }
@@ -167,16 +156,13 @@ inline bool ProperShifting::isKeyModifier(Key key) {
           && key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
 }
 
-// Determine if any non-shift modifiers are active.
-// TODO: See if there's a more efficient way of doing this.
-inline bool ProperShifting::anyModifiersActive() {
-  static int i;
-  for(i = 0; i < kNumModifiers; i++) {
-    if(wasModifierKeyActive(modifiers_[i])) {
-      return true;
-    }
-  }
-  return false;
+// Check a key's flags to see if a modifier is being held.
+inline bool ProperShifting::isModifierHeld(uint8_t flags) {
+  return flags & CTRL_HELD
+         || flags & LALT_HELD
+         || flags & RALT_HELD
+         || flags & SHIFT_HELD
+         || flags & GUI_HELD;
 }
 
 // Determine which shift key (if any, or both) is currently active.
