@@ -41,7 +41,7 @@ class ProperShifting : public kaleidoscope::Plugin {
 
     // Key introspection methods.
     inline bool isKeyModifier(Key key);
-    inline bool isModifierHeld(uint8_t flags);
+    inline bool anyModifiersHeld();
     inline int whichShiftActive();
 
     // Determine if key `key` is a shift.

@@ -93,7 +93,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
   if(disabled_
      || isKeyModifier(mapped_key)
      || Layer.top() != 0  // Prevents issues with '{' and '}' on default keymap.
-     || isModifierHeld(mapped_key.flags)
+     || anyModifiersHeld()
      || whichShiftActive() == BOTH) {
     return EventHandlerResult::OK;
   }
@@ -149,20 +149,28 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
 // Determine if a given key is a non-shift modifier.
 inline bool ProperShifting::isKeyModifier(Key key) {
   // If it's not a keyboard key, return false
-  if(key.flags & (SYNTHETIC | RESERVED)) return false;
-  if(isKeyShift(key)) return false;  // Don't consider space a modifier
+  if(key.flags & (SYNTHETIC | RESERVED) || isKeyShift(key)) return false;
 
   return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER
           && key.keyCode <= HID_KEYBOARD_LAST_MODIFIER);
 }
 
-// Check a key's flags to see if a modifier is being held.
-inline bool ProperShifting::isModifierHeld(uint8_t flags) {
-  return flags & SHIFT_HELD
-         || flags & GUI_HELD
-         || flags & LALT_HELD
-         || flags & RALT_HELD
-         || flags & CTRL_HELD;
+// Determine if any non-shift modifier is being held. There's no nice API for
+// this, so we have to do it manually. Modifier states are stored in a bitmap
+// in Keyboard.lastReport.modifiers.
+//
+//   7: Right GUI
+//   6: Right alt
+//   5: Right shift
+//   4: Right control
+//   3: Left GUI
+//   2: Left alt
+//   1: Left shift
+//   0: Left control
+//
+// We simply construct a mask to see if any non-shift modifiers are active.
+inline bool ProperShifting::anyModifiersHeld() {
+  return Keyboard.lastKeyReport.modifiers & B11011101;
 }
 
 // Determine which shift key (if any, or both) is currently active.
