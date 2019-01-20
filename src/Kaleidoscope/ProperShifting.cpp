@@ -88,13 +88,14 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
     return EventHandlerResult::EVENT_CONSUMED;
   }
 
-  // Holding *any* non-shift modifier negates all shifting rules, so
-  // we test that first in order to succeed early, if possible.
+  // There are a number of states that disable (temporarily or permanently)
+  // the shifting rules.
+  int active_shifts = whichShiftActive();  // Avoid recomputing later.
   if(disabled_
      || isKeyModifier(mapped_key)
      || Layer.top() != 0  // Prevents issues with '{' and '}' on default keymap.
      || anyModifiersHeld()
-     || whichShiftActive() == BOTH) {
+     || active_shifts == BOTH) {
     return EventHandlerResult::OK;
   }
 
@@ -118,7 +119,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
 
   // Shift rules only take effect when one shift is active AND no other
   // modifiers are active. We already tested for BOTH shifts above.
-  switch(whichShiftActive()) {
+  switch(active_shifts) {
   case LEFT:  // Only right-side keys allowed
     if(col < kDivider) {
       last_event_allowed_ = false;
@@ -148,7 +149,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
 
 // Determine if a given key is a non-shift modifier.
 inline bool ProperShifting::isKeyModifier(Key key) {
-  // If it's not a keyboard key, return false
+  // If it's not a keyboard key, or it's a shift key, return false
   if(key.flags & (SYNTHETIC | RESERVED) || isKeyShift(key)) return false;
 
   return (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER
@@ -169,8 +170,11 @@ inline bool ProperShifting::isKeyModifier(Key key) {
 //   0: Left control
 //
 // We simply construct a mask to see if any non-shift modifiers are active.
+
+#define SHIFT_MASK B11011101
+
 inline bool ProperShifting::anyModifiersHeld() {
-  return Keyboard.lastKeyReport.modifiers & B11011101;
+  return Keyboard.lastKeyReport.modifiers & SHIFT_MASK;
 }
 
 // Determine which shift key (if any, or both) is currently active.
