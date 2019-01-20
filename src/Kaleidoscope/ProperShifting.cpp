@@ -24,8 +24,8 @@ namespace plugin {
 
 // ProperShifting
 
-bool ProperShifting::disabled_ = false;
-bool ProperShifting::allow_events_ = true;
+bool ProperShifting::disabled_           = false;
+bool ProperShifting::allow_events_       = true;
 bool ProperShifting::last_event_allowed_ = false;
 
 enum { LEFT, RIGHT, BOTH, NONE };  // Currently active shift key(s).
@@ -148,7 +148,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
 // The following methods test modifier states/identities.
 
 // Determine if a given key is a non-shift modifier.
-inline bool ProperShifting::isKeyModifier(Key key) {
+bool ProperShifting::isKeyModifier(Key key) {
   // If it's not a keyboard key, or it's a shift key, return false
   if(key.flags & (SYNTHETIC | RESERVED) || isKeyShift(key)) return false;
 
@@ -173,12 +173,12 @@ inline bool ProperShifting::isKeyModifier(Key key) {
 
 #define SHIFT_MASK B11011101
 
-inline bool ProperShifting::anyModifiersHeld() {
+bool ProperShifting::anyModifiersHeld() {
   return Keyboard.lastKeyReport.modifiers & SHIFT_MASK;
 }
 
 // Determine which shift key (if any, or both) is currently active.
-inline int ProperShifting::whichShiftActive() {
+int ProperShifting::whichShiftActive() {
   if(wasModifierKeyActive(Key_LeftShift)
      && wasModifierKeyActive(Key_RightShift)) {
     return BOTH;

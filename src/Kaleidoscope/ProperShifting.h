@@ -31,8 +31,8 @@ class ProperShifting : public kaleidoscope::Plugin {
 
     // Event-handler methods.
     EventHandlerResult beforeEachCycle();
-    EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row,
-                                        byte col, uint8_t key_state);
+    EventHandlerResult onKeyswitchEvent(Key &mapped_key, byte row, byte col,
+                                        uint8_t key_state);
 
   private:
     static bool disabled_;
