@@ -40,18 +40,18 @@ class ProperShifting : public kaleidoscope::Plugin {
     static bool last_event_allowed_;
 
     // Key introspection methods.
-    inline bool isKeyModifier(Key key);
-    inline bool anyModifiersHeld();
-    inline int whichShiftActive();
+    static inline bool isKeyModifier(Key key);
+    static inline bool anyModifiersHeld();
+    static inline int whichShiftActive();
 
     // Determine if key `key` is a shift.
-    inline bool isKeyShift(Key key) {
+    static inline bool isKeyShift(Key key) {
       return key == Key_LeftShift
              || key == Key_RightShift;
     }
 
     // Determine if ANY key is being pressed.
-    inline bool noKeysPressed() {
+    static inline bool noKeysPressed() {
       return KeyboardHardware.pressedKeyswitchCount() == 0;
     }
 };
