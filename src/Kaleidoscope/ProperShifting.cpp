@@ -47,7 +47,7 @@ bool ProperShifting::active() {
 // A fast typist trying to capitalize a letter with the wrong shift can
 // sometimes wind up typing that letter in lowercase. This happens when
 // the following order of events takes place:
-//   
+//
 //   1. Hold shift
 //   2. Press a letter
 //   3. Release shift
@@ -77,7 +77,7 @@ EventHandlerResult ProperShifting::onKeyswitchEvent(Key &mapped_key,
                                                     byte col,
                                                     uint8_t key_state) {
   // Disabling the plugin will set allowed_events_ to true, so it's safe
-  // to test for it before anything else. Otherwise, we wind up with 
+  // to test for it before anything else. Otherwise, we wind up with
   if(!allow_events_) {
     // The word, "I", can cause problems, because the cycle for typing it
     // often follows the sequence: Shift on, I, Shift off, Space. If that
